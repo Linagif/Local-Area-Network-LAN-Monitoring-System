@@ -16,3 +16,8 @@ data/*.db
 
 # Editor settings
 .vscode/
+
+# SQLite write-ahead log files
+*.db-wal
+*.db-shm
+*.db-journal
