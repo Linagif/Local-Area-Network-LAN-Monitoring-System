@@ -38,8 +38,11 @@ def _best_tcp(results: List[CheckResult]) -> Optional[CheckResult]:
 def check_device(device: Device, timeout_s: float = 3.0) -> DeviceReport:
     """Run ICMP plus every configured TCP port check for one registered device."""
     ping = ping_host(device.ip_address, timeout_ms=int(timeout_s * 1000))
-    tcp_results = [tcp_check(device.ip_address, port, timeout_s=timeout_s)
-                   for port in device.ports]
+    tcp_results = []
+    for port in device.ports:
+        result = tcp_check(device.ip_address, port, timeout_s=timeout_s)
+        result.port = port
+        tcp_results.append(result)
     verdict, reason = interpret(ping, _best_tcp(tcp_results))
     return DeviceReport(
         device_id=device.device_id,

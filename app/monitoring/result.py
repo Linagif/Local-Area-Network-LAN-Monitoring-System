@@ -13,6 +13,7 @@ class CheckResult:
     response_time_ms: Optional[float] = None
     error_message: Optional[str] = None
     checked_at: str = ""
+    port: Optional[int] = None
 
     def __post_init__(self):
         if not self.checked_at:
