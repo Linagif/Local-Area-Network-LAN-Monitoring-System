@@ -1,0 +1,18 @@
+# Virtual environment
+.venv/
+
+# Python cache and tooling
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Secrets and environment-specific settings
+.env
+
+# Databases and generated data
+*.db
+*.sqlite3
+data/*.db
+
+# Editor settings
+.vscode/
