@@ -41,6 +41,11 @@ class StatusTracker:
         self._states: Dict[int, _DeviceState] = {}
         self._lock = threading.Lock()
 
+    def restore(self, device_id: int, status: str) -> None:
+        """Seed a device's confirmed status (used when the monitor restarts)."""
+        with self._lock:
+            self._states[device_id] = _DeviceState(confirmed=status)
+
     def update(self, report: DeviceReport) -> Optional[StatusChange]:
         verdict = report.verdict
         with self._lock:
