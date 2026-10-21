@@ -8,6 +8,20 @@ from app.monitoring.result import CheckResult
 # Matches "time=12ms", "time<1ms" and Linux-style "time=0.045 ms"
 _TIME_RE = re.compile(r"time\s*([=<])\s*([\d.]+)\s*ms", re.IGNORECASE)
 
+# Lines of ping output that carry no diagnostic information (headers and statistics).
+_NOISE_PREFIXES = ("pinging ", "ping statistics", "packets:", "approximate round trip",
+                   "minimum =", "ping ", "---")
+
+
+def _error_detail(output: str) -> str:
+    """Pick the most informative line of ping output, for unexpected failures."""
+    lines = [ln.strip() for ln in output.splitlines() if ln.strip()]
+    useful = [ln for ln in lines if not ln.lower().startswith(_NOISE_PREFIXES)]
+    if useful:
+        return useful[0][:200]
+    stats = [ln for ln in lines if ln.lower().startswith("packets:")]
+    return (stats[0] if stats else "ping gave no usable output")[:200]
+
 
 def ping_host(ip_address: str, timeout_ms: int = 2000) -> CheckResult:
     """Send one ICMP echo request to a registered device and classify the outcome."""
@@ -59,8 +73,7 @@ def ping_host(ip_address: str, timeout_ms: int = 2000) -> CheckResult:
         return CheckResult(target, "ICMP", "UNREACHABLE",
                            error_message="Destination unreachable")
 
-    first_line = next((ln.strip() for ln in output.splitlines() if ln.strip()), "No output")
-    return CheckResult(target, "ICMP", "ERROR", error_message=first_line)
+    return CheckResult(target, "ICMP", "ERROR", error_message=_error_detail(output))
 
 
 if __name__ == "__main__":
